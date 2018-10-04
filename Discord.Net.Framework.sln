@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2016
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Discord.Net.Framework", "Discord.Net.Framework\Discord.Net.Framework.csproj", "{6C4CE9B3-B3FC-4F92-A6BE-5B2709882362}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ebaybot", "ebaybot\ebaybot.csproj", "{39DAB1BA-A769-4723-9B72-FB6E793744FC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6C4CE9B3-B3FC-4F92-A6BE-5B2709882362}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C4CE9B3-B3FC-4F92-A6BE-5B2709882362}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C4CE9B3-B3FC-4F92-A6BE-5B2709882362}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C4CE9B3-B3FC-4F92-A6BE-5B2709882362}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39DAB1BA-A769-4723-9B72-FB6E793744FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39DAB1BA-A769-4723-9B72-FB6E793744FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39DAB1BA-A769-4723-9B72-FB6E793744FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39DAB1BA-A769-4723-9B72-FB6E793744FC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {081D3E24-0900-44D5-B3A4-9B9F5FD570A4}
+	EndGlobalSection
+EndGlobal
