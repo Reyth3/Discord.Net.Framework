@@ -1,20 +1,25 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace Discord.Net.Framework
 {
     public class SettingsDictionary : Dictionary<string, object>
     {
+        public SettingsDictionary()
+        {
+        }
+
         public SettingsDictionary(GlobalPreferences prefs) : base()
         {
             globalPrefs = prefs;
         }
 
-        private GlobalPreferences globalPrefs;
-
+        internal GlobalPreferences globalPrefs;
         // Quick Access Properties
-        public string CommandPrefix => GetValueOrGlobal<string>("prefix");
+        public string CommandPrefix { get { return GetValueOrGlobal<string>("prefix"); } set { AddOrUpdate("prefix", value); } }
 
 
         public T GetValue<T>(string key, T defValue)
@@ -31,7 +36,7 @@ namespace Discord.Net.Framework
             else return globalPrefs.GetValue(key, default(T));
         }
 
-        public void AddOrUpdate(ulong id, string key, object value)
+        public void AddOrUpdate(string key, object value)
         {
             if (ContainsKey(key))
                 if (value == null)

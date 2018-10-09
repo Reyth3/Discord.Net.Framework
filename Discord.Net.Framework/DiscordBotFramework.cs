@@ -3,6 +3,7 @@ using Discord.Net.Framework.Enums;
 using Discord.Net.WebSockets;
 using Discord.WebSocket;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -11,13 +12,19 @@ namespace Discord.Net.Framework
 {
     public class DiscordBotFramework
     {
-        public DiscordBotFramework(string cmdPrefix)
+        private static Dictionary<string, DiscordBotFramework> _instances;
+
+        public DiscordBotFramework(string cmdPrefix, string instanceId = "")
         {
+            if (_instances == null)
+                _instances = new Dictionary<string, DiscordBotFramework>();
+            _instances.Add(instanceId, this);
             Commands = new CommandService();
             R = new Random();
-            Preferences = GlobalPreferences.LoadFromFile();
+            Preferences = GlobalPreferences.LoadFromFile(instanceId);
             Preferences.SetValue("prefix", cmdPrefix);
             CommandPrefix = cmdPrefix;
+            InstanceId = instanceId;
         }
 
         public DiscordSocketClient Client { get; set; }
@@ -25,6 +32,7 @@ namespace Discord.Net.Framework
         public Random R { get; set; }
         public GlobalPreferences Preferences { get; set; }
         public string CommandPrefix { get; set; }
+        public string InstanceId { get; set; }
 
         public void Log(string module, string message, LogType logType = LogType.Success)
         {
@@ -77,6 +85,7 @@ namespace Discord.Net.Framework
             } while (token == "");
 
             await Commands.AddModuleAsync<Commands.Info>();
+            await Commands.AddModuleAsync<Commands.Admin>();
         }
 
         private async Task Client_MessageReceived(SocketMessage msg)
@@ -94,6 +103,7 @@ namespace Discord.Net.Framework
                 var result = await Commands.ExecuteAsync(context, argPos);
                 if (!result.IsSuccess)
                     await message.Channel.SendMessageAsync($"**Error!** *{result.ErrorReason}*");
+                Log("Commands", $"{context.Guild.Name} > {message.Author}: {message.Content} ({(result.IsSuccess ? "Success" : result.Error.ToString())})", result.IsSuccess ? LogType.Success : LogType.Warning);
             }
         }
 
@@ -106,6 +116,13 @@ namespace Discord.Net.Framework
         {
             foreach(var t in modules)
                 await Commands.AddModuleAsync(t);
+        }
+
+        public static DiscordBotFramework GetInstance(string id)
+        {
+            if (_instances.ContainsKey(id))
+                return _instances[id];
+            else return null;
         }
     }
 }

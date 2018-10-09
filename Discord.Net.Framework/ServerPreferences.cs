@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace Discord.Net.Framework
@@ -13,8 +14,14 @@ namespace Discord.Net.Framework
             config = new Dictionary<ulong, SettingsDictionary>();
         }
 
+        public ServerPreferences(GlobalPreferences prefs)
+        {
+            config = new Dictionary<ulong, SettingsDictionary>();
+            globalPrefs = prefs;
+        }
+
         [JsonProperty]
-        private Dictionary<ulong, SettingsDictionary> config;
+        internal Dictionary<ulong, SettingsDictionary> config;
 
         internal GlobalPreferences globalPrefs;
 
@@ -26,6 +33,7 @@ namespace Discord.Net.Framework
             {
                 var dict = new SettingsDictionary(globalPrefs);
                 config.Add(id, dict);
+                globalPrefs.SavePreferences();
                 return dict;
             }
         }
