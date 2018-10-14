@@ -52,5 +52,17 @@ namespace Discord.Net.Framework
             }
             else return new UserSearchResult(UserSearchResult.UserSearchResultStatus.FoundMatch, User);
         }
+
+        public void CreateFollowUpContext(string tag, object data=null)
+        {
+            var cfuc = new CommandFollowUpContext(tag, data)
+            {
+                _instance = FrameworkInstance,
+                _owner = User
+            };
+            if (FrameworkInstance.FollowUpContexts.ContainsKey(User.Id))
+                FrameworkInstance.FollowUpContexts[User.Id] = cfuc;
+            else FrameworkInstance.FollowUpContexts.Add(User.Id, cfuc);
+        }
     }
 }

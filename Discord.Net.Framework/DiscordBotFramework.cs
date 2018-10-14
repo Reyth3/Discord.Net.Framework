@@ -25,6 +25,7 @@ namespace Discord.Net.Framework
             Preferences.SetValue("prefix", cmdPrefix);
             CommandPrefix = cmdPrefix;
             InstanceId = instanceId;
+            FollowUpContexts = new Dictionary<ulong, CommandFollowUpContext>();
         }
 
         public DiscordSocketClient Client { get; set; }
@@ -33,6 +34,8 @@ namespace Discord.Net.Framework
         public GlobalPreferences Preferences { get; set; }
         public string CommandPrefix { get; set; }
         public string InstanceId { get; set; }
+        internal Dictionary<ulong, CommandFollowUpContext> FollowUpContexts { get; set; }
+
 
         public void Log(string module, string message, LogType logType = LogType.Success)
         {
@@ -97,7 +100,9 @@ namespace Discord.Net.Framework
             var guild = (message.Channel as IGuildChannel)?.Guild;
             var guildId = guild != null ? guild.Id : 0;
             var prefix = Preferences.ServerSpecific.GetFor(guildId).CommandPrefix;
-            if (message.HasStringPrefix(prefix, ref argPos))
+            if (FollowUpContexts.ContainsKey(message.Author.Id) && FollowUpContexts[message.Author.Id] != null)
+                OnFollowUpMessageReceived(FollowUpContexts[message.Author.Id]);
+            else if (message.HasStringPrefix(prefix, ref argPos))
             {
                 var context = new ExtendedCommandContext(Client, message, this);
                 var result = await Commands.ExecuteAsync(context, argPos);
@@ -124,5 +129,15 @@ namespace Discord.Net.Framework
                 return _instances[id];
             else return null;
         }
+
+
+        #region Events
+        public event Action<object, CommandFollowUpContext> FollowUpMessageReceived;
+
+        internal void OnFollowUpMessageReceived(CommandFollowUpContext context)
+        {
+            FollowUpMessageReceived?.Invoke(this, context);
+        }
+        #endregion
     }
 }

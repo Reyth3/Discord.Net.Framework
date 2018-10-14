@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
@@ -25,14 +26,22 @@ namespace Discord.Net.Framework
         public T GetValue<T>(string key, T defValue)
         {
             if (ContainsKey(key))
+            {
+                if (this[key] is JObject)
+                    return (this[key] as JObject).ToObject<T>();
                 return (T)this[key];
+            }
             else return defValue;
         }
 
         public T GetValueOrGlobal<T>(string key)
         {
             if (ContainsKey(key))
+            {
+                if (this[key] is JObject)
+                    return (this[key] as JObject).ToObject<T>();
                 return (T)this[key];
+            }
             else return globalPrefs.GetValue(key, default(T));
         }
 
@@ -44,7 +53,7 @@ namespace Discord.Net.Framework
                 else this[key] = value;
             else if (value != null)
                 Add(key, value);
-            globalPrefs.SavePreferences();
+            SavePreferences();
         }
 
         public void SavePreferences()
