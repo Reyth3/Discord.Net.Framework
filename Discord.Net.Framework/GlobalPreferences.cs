@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -56,7 +57,11 @@ namespace Discord.Net.Framework
         public T GetValue<T>(string key, T defValue)
         {
             if (config.TryGetValue(key, out object value))
-                return (T)value;
+                if (value is JObject jo)
+                    return jo.ToObject<T>();
+                else if (value is JArray ja)
+                    return ja.ToObject<T>();
+                else return (T)value;
             else return defValue;
         }
 

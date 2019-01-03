@@ -2,6 +2,7 @@
 using Discord.Net.Framework.Enums;
 using Discord.Net.WebSockets;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,6 +19,7 @@ namespace Discord.Net.Framework
         {
             if (_instances == null)
                 _instances = new Dictionary<string, DiscordBotFramework>();
+            Client = new DiscordSocketClient();
             _instances.Add(instanceId, this);
             Commands = new CommandService();
             R = new Random();
@@ -29,6 +31,7 @@ namespace Discord.Net.Framework
         }
 
         public DiscordSocketClient Client { get; set; }
+        internal IServiceProvider Services { get; set; }
         internal CommandService Commands { get; set; }
         public Random R { get; set; }
         public GlobalPreferences Preferences { get; set; }
@@ -61,7 +64,8 @@ namespace Discord.Net.Framework
 
         public async Task RunAsync()
         {
-            Client = new DiscordSocketClient();
+            if (Services == null)
+                throw new NullReferenceException("The services have to be configured before attempting to run the bot.");
             Client.Ready += async () =>
             {
                 Log("Bot", "Bot ready");
@@ -87,8 +91,23 @@ namespace Discord.Net.Framework
                 }
             } while (token == "");
 
-            await Commands.AddModuleAsync<Commands.Info>();
-            await Commands.AddModuleAsync<Commands.Admin>();
+            await Commands.AddModuleAsync<Commands.Info>(Services);
+            await Commands.AddModuleAsync<Commands.Admin>(Services);
+        }
+
+        public ServiceProvider ConfigureServices(params Type[] services)
+        {
+            var builder = new ServiceCollection();
+            builder.AddSingleton<DiscordSocketClient>(Client)
+                .AddSingleton<CommandService>(Commands)
+                .AddSingleton<GlobalPreferences>(Preferences)
+                .BuildServiceProvider();
+            foreach (var service in services)
+                builder.AddSingleton(service);
+
+            var provider = builder.BuildServiceProvider();
+            Services = provider;
+            return provider;
         }
 
         private async Task Client_MessageReceived(SocketMessage msg)
@@ -105,7 +124,7 @@ namespace Discord.Net.Framework
             else if (message.HasStringPrefix(prefix, ref argPos))
             {
                 var context = new ExtendedCommandContext(Client, message, this);
-                var result = await Commands.ExecuteAsync(context, argPos);
+                var result = await Commands.ExecuteAsync(context, argPos, Services);
                 if (!result.IsSuccess)
                     await message.Channel.SendMessageAsync($"**Error!** *{result.ErrorReason}*");
                 Log("Commands", $"{context.Guild.Name} > {message.Author}: {message.Content} ({(result.IsSuccess ? "Success" : result.Error.ToString())})", result.IsSuccess ? LogType.Success : LogType.Warning);
@@ -114,13 +133,13 @@ namespace Discord.Net.Framework
 
         public async Task ImportCommandsAsync(Assembly assembly)
         {
-            await Commands.AddModulesAsync(assembly);
+            await Commands.AddModulesAsync(assembly, Services);
         }
 
         public async Task ImportCommandsAsync(params Type[] modules)
         {
             foreach(var t in modules)
-                await Commands.AddModuleAsync(t);
+                await Commands.AddModuleAsync(t, Services);
         }
 
         public static DiscordBotFramework GetInstance(string id)
@@ -138,6 +157,7 @@ namespace Discord.Net.Framework
         {
             FollowUpMessageReceived?.Invoke(this, context);
         }
+
         #endregion
     }
 }

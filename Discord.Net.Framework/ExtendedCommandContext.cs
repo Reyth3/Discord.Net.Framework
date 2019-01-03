@@ -38,7 +38,7 @@ namespace Discord.Net.Framework
         {
             if (match != "")
             {
-                var users = (await Channel.GetUsersAsync(CacheMode.AllowDownload).Flatten());
+                var users = (await Channel.GetUsersAsync(CacheMode.AllowDownload).FlattenAsync());
                 var search = users.Where(o => o.Username.ToLower().Contains(match.ToLower()) || Message.MentionedUserIds.Contains(o.Id) || o.ToString().ToLower().Contains(match.ToLower())).ToArray();
                 if (search.Length == 0)
                 {
