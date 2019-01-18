@@ -31,7 +31,7 @@ namespace Discord.Net.Framework
         }
 
         public DiscordSocketClient Client { get; set; }
-        internal IServiceProvider Services { get; set; }
+        public IServiceProvider Services { get; set; }
         internal CommandService Commands { get; set; }
         public Random R { get; set; }
         public GlobalPreferences Preferences { get; set; }
@@ -81,8 +81,7 @@ namespace Discord.Net.Framework
                 token = File.ReadAllText(tokenPath);
                 if (token == "")
                 {
-                    Log("Bot", "Missing token! Set a bot token in 'token.txt' and press enter to continue.", LogType.Warning);
-                    Console.ReadLine();
+                    throw new ArgumentNullException("The token is not specified in the 'token.txt' file.");
                 }
                 else
                 {
@@ -101,7 +100,8 @@ namespace Discord.Net.Framework
             builder.AddSingleton<DiscordSocketClient>(Client)
                 .AddSingleton<CommandService>(Commands)
                 .AddSingleton<GlobalPreferences>(Preferences)
-                .BuildServiceProvider();
+                .AddSingleton<Random>(R);
+
             foreach (var service in services)
                 builder.AddSingleton(service);
 
