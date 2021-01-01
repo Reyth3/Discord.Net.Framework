@@ -1,4 +1,7 @@
-﻿namespace Discord.Net.Framework
+﻿using Discord.Commands;
+using Discord.WebSocket;
+
+namespace Discord.Net.Framework
 {
     public class CommandFollowUpContext
     {
@@ -10,6 +13,7 @@
 
         public string Tag { get; set; }
         public object Data { get; set; }
+        public ExtendedCommandContext Context{ get; set; }
 
         internal DiscordBotFramework _instance;
         internal IUser _owner;
